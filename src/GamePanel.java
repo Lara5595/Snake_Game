@@ -10,15 +10,15 @@ import java.awt.event.*;
 
 public class GamePanel extends JPanel implements ActionListener {
 
-    static final int SCREEN_WIDTH = 600;
-    static final int SCREEN_HEIGHT = 600;
-    static final int UNIT_SIZE = 25;
-    static final int GAME_UNITS = (SCREEN_WIDTH*SCREEN_HEIGHT)/UNIT_SIZE;
-    static final int DELAY = 75;
+    static final int SCREEN_WIDTH = 1300;
+    static final int SCREEN_HEIGHT = 750;
+    static final int UNIT_SIZE = 50;
+    static final int GAME_UNITS = (SCREEN_WIDTH*SCREEN_HEIGHT)/(UNIT_SIZE*UNIT_SIZE);
+    static final int DELAY = 175;
 
 //    creating arrays
     final int x[] = new int[GAME_UNITS];
-    final int y[] = new int [GAME_UNITS];
+    final int y[] = new int[GAME_UNITS];
 
 //    We will begin with 6 body parts
     int bodyParts = 6;
@@ -33,6 +33,17 @@ public class GamePanel extends JPanel implements ActionListener {
 
     Timer timer;
     Random random;
+
+
+    //    Constructor
+    GamePanel(){
+        random = new Random();
+        this.setPreferredSize(new Dimension(SCREEN_WIDTH,SCREEN_HEIGHT));
+        this.setBackground(Color.black);
+        this.setFocusable(true);
+        this.addKeyListener(new MyKeyAdapter());
+        startGame();
+    }
 
 
 //Methods
@@ -53,42 +64,79 @@ public class GamePanel extends JPanel implements ActionListener {
 
     }
 
-    public void draw(Graphics g){
-        if (running){
-//        Turned into grid, so it's easier to see this will draw lines in the grith
-        for(int i=0; i < SCREEN_HEIGHT/UNIT_SIZE; i++){
-            g.drawLine(i*UNIT_SIZE, 0, i*UNIT_SIZE, SCREEN_HEIGHT);
-            g.drawLine(0, i*UNIT_SIZE, SCREEN_WIDTH, i*UNIT_SIZE);
-        }
-//        Setting the color of apple
-        g.setColor(Color.red);
-        g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
 
-//        This draws the snake head
-        for (int i = 0; i < bodyParts; i++) {
-            if (i == 0) {
-                g.setColor(Color.green);
-                g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
-            }
-//            This is for the body
-            else {
-                g.setColor(new Color(45, 180, 0));
-//                This does random colors to the snake this code is optional
-                g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
-                g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+    public void draw(Graphics g) {
 
-            }
-        }
+        if(running) {
+
+			for(int i=0;i<SCREEN_HEIGHT/UNIT_SIZE;i++) {
+				g.drawLine(i*UNIT_SIZE, 0, i*UNIT_SIZE, SCREEN_HEIGHT);
+				g.drawLine(0, i*UNIT_SIZE, SCREEN_WIDTH, i*UNIT_SIZE);
+			}
+
             g.setColor(Color.red);
-            g.setFont(new Font("Ink Free", Font.BOLD, 40));
-            FontMetrics metrics = getFontMetrics(g.getFont());
-//         This will center Game over in the screen
-            g.drawString("Score: " + applesEaten,(SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten))/2, g.getFont().getSize());
+            g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
 
-        } else {
+            for(int i = 0; i< bodyParts;i++) {
+                if(i == 0) {
+                    g.setColor(Color.green);
+                    g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+                }
+                else {
+                    g.setColor(new Color(45,180,0));
+                    //g.setColor(new Color(random.nextInt(255),random.nextInt(255),random.nextInt(255)));
+                    g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+                }
+            }
+            g.setColor(Color.red);
+            g.setFont( new Font("Ink Free",Font.BOLD, 40));
+            FontMetrics metrics = getFontMetrics(g.getFont());
+            g.drawString("Score: "+applesEaten, (SCREEN_WIDTH - metrics.stringWidth("Score: "+applesEaten))/2, g.getFont().getSize());
+        }
+        else {
             gameOver(g);
         }
+
     }
+
+//    public void draw(Graphics g){
+//        if (running){
+////        Turned into grid, so it's easier to see this will draw lines in the grith
+//        for(int i=0; i < SCREEN_HEIGHT/UNIT_SIZE; i++){
+//            g.drawLine(i*UNIT_SIZE, 0, i*UNIT_SIZE, SCREEN_HEIGHT);
+//            g.drawLine(0, i*UNIT_SIZE, SCREEN_WIDTH, i*UNIT_SIZE);
+//        }
+////        Setting the color of apple
+//        g.setColor(Color.red);
+//        g.fillOval(appleX, appleY, UNIT_SIZE, UNIT_SIZE);
+//
+////        This draws the snake head
+//        for (int i = 0; i < bodyParts; i++) {
+//            if (i == 0) {
+//                g.setColor(Color.green);
+//                g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+//            }
+////            This is for the body
+//            else {
+//                g.setColor(new Color(45, 180, 0));
+////                This does random colors to the snake this code is optional
+//                g.setColor(new Color(random.nextInt(255), random.nextInt(255), random.nextInt(255)));
+//                g.fillRect(x[i], y[i], UNIT_SIZE, UNIT_SIZE);
+//
+//            }
+//        }
+//            g.setColor(Color.red);
+//            g.setFont(new Font("Ink Free", Font.BOLD, 40));
+//            FontMetrics metrics = getFontMetrics(g.getFont());
+////         This will center Game over in the screen
+//            g.drawString("Score: " + applesEaten,(SCREEN_WIDTH - metrics.stringWidth("Score: " + applesEaten))/2, g.getFont().getSize());
+//
+//        } else {
+//            gameOver(g);
+//        }
+//    }
+
+
 
     public void newApple(){
 //        This will make a apple appear in the x axis at random
@@ -100,18 +148,18 @@ public class GamePanel extends JPanel implements ActionListener {
     public void move() {
 //        This moves the snake
         for (int i = bodyParts; i>0; i--){
-            x[i] = x[-1];
-            y[i] = y[-1];
+            x[i] = x[i-1];
+            y[i] = y[i-1];
         }
 
 //         This gives the snake controls
-        switch (direction) {
+        switch(direction) {
             case 'U':
                 y[0] = y[0] - UNIT_SIZE;
                 break;
             case 'D':
                 y[0] = y[0] + UNIT_SIZE;
-            break;
+                break;
             case 'L':
                 x[0] = x[0] - UNIT_SIZE;
                 break;
@@ -121,70 +169,57 @@ public class GamePanel extends JPanel implements ActionListener {
         }
     }
 
-    public void checkApple(){
-        if ((x[0] == appleX) && (y[0] == appleY)){
-//            If snakes eats a apple it grows
+    public void checkApple() {
+        if((x[0] == appleX) && (y[0] == appleY)) {
             bodyParts++;
-
             applesEaten++;
             newApple();
         }
     }
 
-    public void checkCollisions(){
-//        checks if head x[0] collides with body
-        for (int i = bodyParts; i>0;i--){
-            if ((x[0] == x[i]) && (y[0] == y[i])){
+    public void checkCollisions() {
+        //checks if head collides with body
+        for(int i = bodyParts;i>0;i--) {
+            if((x[0] == x[i])&& (y[0] == y[i])) {
                 running = false;
             }
         }
-//        Check if head touches left border
-//        running = false ends the game
-        if (x[0] < 0){
+        //check if head touches left border
+        if(x[0] < 0) {
             running = false;
         }
-//        Check if head touches right border
-        if (x[0] < SCREEN_WIDTH){
+        //check if head touches right border
+        if(x[0] > SCREEN_WIDTH) {
             running = false;
         }
-//      Check if head touches top border
-        if (y[0] < 0){
+        //check if head touches top border
+        if(y[0] < 0) {
             running = false;
         }
-//        Check if head touches bottom border
-        if (y[0] < SCREEN_HEIGHT){
+        //check if head touches bottom border
+        if(y[0] > SCREEN_HEIGHT) {
             running = false;
         }
 
-        if (!running){
+        if(!running) {
             timer.stop();
         }
     }
 
-    public void gameOver(Graphics g){
-        // Score
+    public void gameOver(Graphics g) {
+        //Score
         g.setColor(Color.red);
-        g.setFont(new Font("Ink Free", Font.BOLD, 40));
+        g.setFont( new Font("Ink Free",Font.BOLD, 40));
         FontMetrics metrics1 = getFontMetrics(g.getFont());
-//         This will center Game over in the screen
-        g.drawString("Score: " + applesEaten,(SCREEN_WIDTH - metrics1.stringWidth("Score: " + applesEaten))/2, g.getFont().getSize());
-        // Game Over text
+        g.drawString("Score: "+applesEaten, (SCREEN_WIDTH - metrics1.stringWidth("Score: "+applesEaten))/2, g.getFont().getSize());
+        //Game Over text
         g.setColor(Color.red);
-        g.setFont(new Font("Ink Free", Font.BOLD, 75));
+        g.setFont( new Font("Ink Free",Font.BOLD, 75));
         FontMetrics metrics2 = getFontMetrics(g.getFont());
-//         This will center Game over in the screen
-        g.drawString("Game Over",(SCREEN_WIDTH - metrics2.stringWidth("Game Over"))/2, SCREEN_HEIGHT/2);
+        g.drawString("Game Over", (SCREEN_WIDTH - metrics2.stringWidth("Game Over"))/2, SCREEN_HEIGHT/2);
     }
 
-    //    Constructor
-    GamePanel(){
-        random = new Random();
-        this.setPreferredSize(new Dimension(SCREEN_WIDTH, SCREEN_HEIGHT));
-        this.setBackground(Color.black);
-        this.setFocusable(true);
-        this.addKeyListener(new MyKeyAdapter());
-        startGame();
-    }
+
 
     @Override
     public void actionPerformed(ActionEvent e) {
@@ -199,32 +234,32 @@ public class GamePanel extends JPanel implements ActionListener {
 
 
 //    inner class
-    public class MyKeyAdapter extends KeyAdapter{
-        public void keyPressed(KeyEvent e){
-            switch (e.getKeyCode()){
-                case KeyEvent.VK_LEFT:
-                    if (direction != 'R') {
-                        direction = 'L';
-                    }
-                    break;
-                case KeyEvent.VK_RIGHT:
-                    if (direction != 'L') {
-                        direction = 'R';
-                    }
-                    break;
-                case KeyEvent.VK_UP:
-                    if (direction != 'D') {
-                        direction = 'U';
-                    }
-                    break;
-                case KeyEvent.VK_DOWN:
-                    if (direction != 'U') {
-                        direction = 'L';
-                    }
-                    break;
-            }
-
+public class MyKeyAdapter extends KeyAdapter{
+    @Override
+    public void keyPressed(KeyEvent e) {
+        switch(e.getKeyCode()) {
+            case KeyEvent.VK_LEFT:
+                if(direction != 'R') {
+                    direction = 'L';
+                }
+                break;
+            case KeyEvent.VK_RIGHT:
+                if(direction != 'L') {
+                    direction = 'R';
+                }
+                break;
+            case KeyEvent.VK_UP:
+                if(direction != 'D') {
+                    direction = 'U';
+                }
+                break;
+            case KeyEvent.VK_DOWN:
+                if(direction != 'U') {
+                    direction = 'D';
+                }
+                break;
         }
+    }
 }
 
 
